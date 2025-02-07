@@ -17,6 +17,7 @@ from effective_complexity.models import list_models
 
 _MODEL_FRIENDLY_NAME_MAP = dict(
     mlp='MLP',
+    gpt='GPT',
 )
 
 MODELS_ALL = {k: _MODEL_FRIENDLY_NAME_MAP.get(k, k)
