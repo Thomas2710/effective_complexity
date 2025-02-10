@@ -1,46 +1,28 @@
 import matplotlib.pyplot as plt
-from effective_complexity.data import collate_fn, apply_pca, apply_tsne, show_distrib, show_gaussian
+from effective_complexity.data import apply_pca, apply_tsne, show_distrib, show_gaussian
+from effective_complexity.datasets import collate_fn
 import numpy as np
-from effective_complexity.model import MLP, initialize_weights
+#from effective_complexity.model import MLP, initialize_weights
 import torch.nn as nn
 import torch
 from tqdm import tqdm
 import torch.optim as optim
 
-from effective_complexity.functions import train_loop, val_loop, test_loop, initialize_synthetic_exp, compute_fx, generate_labels
-
+from effective_complexity.functions import train_loop, val_loop, test_loop
 from torch.utils.data import DataLoader
 
 
-def identify(model, hyperparams):
+def identify(dataset, model, hyperparams):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    train_dataset, val_dataset, test_dataset = dataset
+
     #CREATE SYNTHETIC DATASET
-    DIMS = hyperparams['DIMS']
-    COV = hyperparams['COV']
-    MU = hyperparams['MU']
     BATCH_SIZE = hyperparams['BATCH_SIZE']
     epochs = hyperparams['num_epochs']
     lr = hyperparams['learning_rate']
-    # Number of points to sample
-    num_samples = hyperparams['num_samples']
 
-
-
-    # Instantiate the MLP (f(x))
-    input_size = 3  # Number of input features
-    hidden_sizes = [64, 32, 64]  # Hidden layer sizes
-    output_size = 3  # Number of output features (e.g., classification classes)
-
-    #Create gaussian distributed samples and orthogonal vectors in matrix W
-    W, samples = initialize_synthetic_exp(DIMS, MU, COV, num_samples)
-
-    #Compute label distribution
-    with torch.no_grad():
-        f_x = compute_fx(samples, input_size, hidden_sizes, output_size)
-        #Get distribution label
-        train_dataset, val_dataset, test_dataset = generate_labels(f_x, W, num_samples)
-
+    #LOAD DATALOADERS
     train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, collate_fn=collate_fn)
     val_loader = DataLoader(val_dataset, batch_size = 128, shuffle = True, collate_fn=collate_fn)
     test_loader = DataLoader(test_dataset, batch_size = BATCH_SIZE, shuffle = True, collate_fn=collate_fn)
@@ -67,15 +49,18 @@ def identify(model, hyperparams):
         progress_bar.set_postfix(Val = f"Loss: {val_loss:.4f}, Acc: {val_acc:.4f}")
 
     # Final Test Evaluation
-    test_loss, test_acc, predicted_distrib = test_loop(test_loader, test_model, criterion, device)
+    test_loss, test_acc, predictions = test_loop(test_loader, test_model, criterion, device)
     print("\nFinal Test Results")
     print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_acc:.4f}")
     
-
+    last_layer_name, last_layer_weights = list(test_model.named_parameters())[-2]  # -2 because last is usually bias
+    print(f"\nLast Layer Name: {last_layer_name}")
+    print("Last Layer Weights:", last_layer_weights.shape)
+    #predicted_distrib = compute_distrib(predictions, model)
 
     #PLOT WITH PCA AND TSNE (WHAT DO I PLOT?)
 
-    predicted_distrib = torch.cat(predicted_distrib)
+    predicted_distrib = torch.cat(predictions)
     pcareduced_pred_distrib = apply_pca(predicted_distrib)
     tsnereduced_pred_distrib = apply_tsne(predicted_distrib)
 

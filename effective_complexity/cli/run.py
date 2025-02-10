@@ -18,22 +18,32 @@ import click
 import yaml
 from effective_complexity.globals import *
 
+#os.environ["QT_QPA_PLATFORM"] = "wayland"
 
 @click.command()
-@click.option('-m', '--model', type=click.Choice([*MODELS_ALL]), default=['mlp'],
+@click.option('-m', '--model', type=click.Choice([*MODELS_ALL]), default='mlp',
               help='Models that satisfy paper property', multiple=False)
-def run(model):
+@click.option('-d', '--dataset', type=click.Choice([*DATASETS_ALL]), default='synthetic',
+              help='Datasets', multiple=False)
+
+def run(model, dataset):
     #Run checks and load right configuration
     # Load hyperparameters from YAML file
     with open(os.path.join(os.getcwd(), 'configs', ''+model+'.yaml'), 'r') as file:
         hyperparams = yaml.safe_load(file)
 
-
     #Load model
     from effective_complexity.models import get_model_class
-    from effective_complexity.main import identify
     model_class = get_model_class(model)
-    #print(type(model_class[1]), model_class[1])
     model = model_class[0](hyperparams)
-    identify(model, hyperparams)
+
+    #Load dataset
+    from effective_complexity.datasets import get_dataset_class
+    dataset_class = get_dataset_class(dataset)
+    dataset = dataset_class[0](hyperparams)
+
+
+    #Run main function
+    from effective_complexity.main import identify
+    identify(dataset, model, hyperparams)
  

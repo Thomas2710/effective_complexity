@@ -12,20 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import click
-from effective_complexity.cli import *
+from .datasets import *
 
-@click.group()
-def start():
-    """
-    Effective Complexity CLI
-    """
-    pass
-
-
-start.add_command(run)
-
-
-
-if __name__ == '__main__':
-    main()

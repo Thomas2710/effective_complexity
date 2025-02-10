@@ -64,24 +64,6 @@ def model_gpt(hyperparams):
                 hidden_states = self.model(input_ids=input_ids)
             return hidden_states
 
-
-        '''
-        # Compute model activations of data for an architecture.
-        # Returns a 2D numpy array with [n_datapoints, n_features].
-        # Each word is one datapoint, and converts to one feature vector.
-        def get_activations(self, f_model, data, num_layers=num_layers):
-                _data = data[i]
-                hiddens = f_model(_data)[2] # Get all hidden layers
-                hiddens = [h.numpy() for h in hiddens]
-                hiddens = np.concatenate(hiddens, axis=0)
-                hiddens = hiddens[-num_layers:]
-                # hiddens.shape = (num_layers, num_datapoints, num_features)
-                h.append(hiddens)
-            h = np.concatenate(h, axis=1)
-            print('Activations shape: ', h.shape)
-            return h
-        '''
-
             
         def forward(self, x):
             hiddens = self.model(x)[2]

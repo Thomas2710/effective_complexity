@@ -4,74 +4,11 @@ import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 from mpl_toolkits.mplot3d import Axes3D
 import torch
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import os
 
 matplotlib.use('Qt5Agg')  # Use an interactive backend like TkAgg
-
-
-class SYNTHETIC_DATA(Dataset):
-
-    def __init__(self):
-        """
-        Custom PyTorch Dataset that stores an array of dictionaries.
-
-        Args:
-            data (list of dicts): Each dictionary represents a data point with keys as feature names.
-        """
-        self.data = []
-
-    def __len__(self):
-        """Returns the number of samples in the dataset."""
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        """
-        Retrieves a single sample from the dataset.
-
-        Args:
-            idx (int): Index of the sample.
-
-        Returns:
-            dict: A dictionary containing the features of the indexed sample.
-        """
-        return self.data[idx]
-    
-    def add_item(self, item):
-        """
-        Adds a new item (dictionary) to the dataset.
-
-        Args:
-            item (dict): A dictionary containing the new data sample.
-        """
-        if not isinstance(item, dict):
-            raise ValueError("Item must be a dictionary.")
-        self.data.append(item)
-
-def collate_fn(batch):
-    """ Custom function to collate dictionary-based data. """
-    inputs = torch.stack([item["x"] for item in batch])  # Stack 3D tensors
-    labels = torch.stack([item["label"] for item in batch])  # Convert labels to tensor
-    return {"x": inputs, "label": labels}
-
-def sample_gaussian_3d(mean, cov, num_samples):
-    """
-    Sample points from a 3D Gaussian distribution.
-
-    Parameters:
-        mean (array-like): Mean of the Gaussian distribution (3D vector).
-        cov (array-like): Covariance matrix (3x3 matrix).
-        num_samples (int): Number of points to sample.
-
-    Returns:
-        numpy.ndarray: Array of shape (num_samples, 3) containing sampled points.
-    """
-    return np.random.multivariate_normal(mean, cov, num_samples)
-
-
 
 def show_gaussian(samples, reference = True):
     if reference:

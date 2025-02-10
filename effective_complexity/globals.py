@@ -13,13 +13,20 @@
 # limitations under the License.
 
 from effective_complexity.models import list_models
+from effective_complexity.datasets import list_datasets
 
 
 _MODEL_FRIENDLY_NAME_MAP = dict(
     mlp='MLP',
     gpt='GPT',
 )
-
 MODELS_ALL = {k: _MODEL_FRIENDLY_NAME_MAP.get(k, k)
                 for k in list_models()}
 
+_DATASETS_FRIENDLY_NAME_MAP = dict(
+    synthetic='SYNTHETIC',
+    cifar10='CIFAR10',
+    cifar100='CIFAR100',
+)
+DATASETS_ALL = {k: _DATASETS_FRIENDLY_NAME_MAP.get(k, k)
+                for k in list_datasets()}
