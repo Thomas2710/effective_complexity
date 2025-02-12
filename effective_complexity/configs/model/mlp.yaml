@@ -1,0 +1,14 @@
+#SYNTHETIC
+input_size: 3
+hidden_sizes: [32,64,32]
+output_size: 3
+flatten_input: False
+
+
+#CIFAR EXPERIMENT
+#input_size: 3072
+#hidden_sizes: [1024,512]
+#output_size: 10
+#flatten_input: True
+
+

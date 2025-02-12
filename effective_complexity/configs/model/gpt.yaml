@@ -1,0 +1,9 @@
+#Synthetic config
+model_id: gpt2
+output_size: 3
+flatten_input: False
+
+#CIFAR config
+#model_id: gpt2
+#output_size: 10
+#flatten_input: True

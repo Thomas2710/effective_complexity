@@ -13,4 +13,7 @@
 # limitations under the License.
 
 from .datasets import *
+from .cifar import *
+from .synthetic import *
+from .penntreebank import *
 

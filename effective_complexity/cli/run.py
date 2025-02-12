@@ -29,21 +29,28 @@ from effective_complexity.globals import *
 def run(model, dataset):
     #Run checks and load right configuration
     # Load hyperparameters from YAML file
-    with open(os.path.join(os.getcwd(), 'configs', ''+model+'.yaml'), 'r') as file:
-        hyperparams = yaml.safe_load(file)
+    with open(os.path.join(os.getcwd(), 'configs', 'model',''+model+'.yaml'), 'r') as file:
+        model_hyperparams = yaml.safe_load(file)
+    with open(os.path.join(os.getcwd(), 'configs', 'dataset',''+dataset+'.yaml'), 'r') as file:
+        dataset_hyperparams = yaml.safe_load(file)
+    with open(os.path.join(os.getcwd(), 'configs', 'general.yaml'), 'r') as file:
+        general_hyperparams = yaml.safe_load(file)
+
+    
 
     #Load model
     from effective_complexity.models import get_model_class
     model_class = get_model_class(model)
-    model = model_class[0](hyperparams)
+    model = model_class[0](model_hyperparams)
 
     #Load dataset
     from effective_complexity.datasets import get_dataset_class
     dataset_class = get_dataset_class(dataset)
-    dataset = dataset_class[0](hyperparams)
+    dataloader = dataset_class[0](dataset_hyperparams)
 
 
+    hyperparams = (general_hyperparams, model_hyperparams, dataset_hyperparams)
     #Run main function
     from effective_complexity.main import identify
-    identify(dataset, model, hyperparams)
+    identify(dataloader, model, hyperparams)
  

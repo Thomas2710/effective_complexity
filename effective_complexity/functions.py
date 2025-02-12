@@ -41,12 +41,27 @@ def train_loop(train_loader, model, criterion, optimizer, device = 'cpu'):
     total = 0
     correct = 0
 
+    d = model.get_W().shape[1]
+    one_hots = torch.eye(d).float()
+
+
     for batch in train_loader:
         optimizer.zero_grad()
         labels = batch['label'].to(device)
         inputs = batch['x'].to(device)
         outputs = model(inputs)
-        outputs = logsoftmax(outputs)
+
+        #Compute f_x from output
+        f_x = model.get_fx(outputs)
+        #Compute unenmbed from output
+        unembedding = model.get_unembeddings(one_hots)
+
+        #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
+        logits = torch.matmul(f_x, unembedding)
+
+
+
+        outputs = logsoftmax(logits)
         #MINIMIZE KL DIVERGENCE
         loss = criterion(outputs, labels)
         loss += elastic_net_regularization(model, l1_lambda, l2_lambda, l1_weight, l2_weight)
@@ -75,6 +90,10 @@ def val_loop(val_loader, model, criterion, device = 'cpu'):
     correct = 0
     logsoftmax = nn.LogSoftmax(dim=-1)
 
+    d = model.get_W().shape[1]
+    one_hots = torch.eye(d).float()
+
+
 
     with torch.no_grad():  # No need to track gradients
         for batch in val_loader:
@@ -82,7 +101,17 @@ def val_loop(val_loader, model, criterion, device = 'cpu'):
             labels = batch['label'].to(device)
 
             outputs = model(inputs)
-            outputs = logsoftmax(outputs)
+
+            #Compute f_x from output
+            f_x = model.get_fx(outputs)
+            #Compute unenmbed from output
+            unembedding = model.get_unembeddings(one_hots)
+
+            #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
+            logits = torch.matmul(f_x, unembedding)
+
+
+            outputs = logsoftmax(logits)
             loss = criterion(outputs, labels)
             loss += elastic_net_regularization(model, l1_lambda, l2_lambda, l1_weight, l2_weight)
 
@@ -105,7 +134,10 @@ def test_loop(test_loader, model, criterion, device='cpu'):
     total = 0
     correct = 0
     logsoftmax = nn.LogSoftmax(dim=-1)
-    total_outputs = []
+    total_fx = []
+    d = model.get_W().shape[1]
+    one_hots = torch.eye(d).float()
+
 
 
     with torch.no_grad():  # No need to track gradients
@@ -114,8 +146,18 @@ def test_loop(test_loader, model, criterion, device='cpu'):
             labels = batch['label'].to(device)
 
             outputs = model(inputs)
-            total_outputs.append(outputs)
-            outputs = logsoftmax(outputs)
+
+            #Compute f_x from output
+            f_x = model.get_fx(outputs)
+            total_fx.append(f_x)
+            #Compute unenmbed from output
+            unembedding = model.get_unembeddings(one_hots)
+
+            #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
+            logits = torch.matmul(f_x, unembedding)
+
+            outputs = logsoftmax(logits)
+
             loss = criterion(outputs, labels)
             loss += elastic_net_regularization(model, l1_lambda, l2_lambda, l1_weight, l2_weight)
 
@@ -128,5 +170,5 @@ def test_loop(test_loader, model, criterion, device='cpu'):
 
     avg_loss = total_loss / len(test_loader)
     #accuracy = correct / total
-    return avg_loss, accuracy, total_outputs
+    return avg_loss, accuracy, total_fx
             
