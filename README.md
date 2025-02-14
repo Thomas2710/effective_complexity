@@ -1,11 +1,11 @@
 Make sure you have poetry installed
-'''pip install poetry'''
+```pip install poetry```
 
 Then, clone this repository
-'''
+```
 git clone https://github.com/Thomas2710/effective_complexity.git
 cd effective_complexity
-'''
+```
 
 Install dependencies with poetry
 ```
