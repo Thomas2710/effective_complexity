@@ -8,13 +8,13 @@ cd effective_complexity
 '''
 
 Install dependencies with poetry
-'''
+```
 poetry install
-'''
+```
 Activate the virtual environment
-'''
+```
 poetry shell
-'''
+```
 Then install the package with 
 '''
 pip install -e .
