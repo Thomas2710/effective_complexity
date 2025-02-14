@@ -13,4 +13,7 @@
 # limitations under the License.
 
 from .models import *
+from .cnn import *
+from .gpt2 import *
+from .mlp import *
 

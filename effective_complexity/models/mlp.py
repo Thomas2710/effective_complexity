@@ -15,6 +15,7 @@ def model_mlp(hyperparams):
                 self.layers.append(nn.Linear(in_features, hidden_size))
                 in_features = hidden_size
             self.output_layer = nn.Linear(in_features, output_size)
+            self.label_embedding = nn.Linear(output_size, in_features)
 
         def forward(self, x):
             if self.flatten:
@@ -31,10 +32,17 @@ def model_mlp(hyperparams):
             return x
         
         def get_unembeddings(self, y):
+            return self.label_embedding(y)
+        
+        def get_W(self):
+            return self.label_embedding.weight
+        '''
+        def get_unembeddings(self, y):
             return torch.stack([self.output_layer(i) for i in y])
         
         def get_W(self):
             return self.output_layer.weight
+        '''
         
     flatten_input = hyperparams['flatten_input']
     input_size = hyperparams['input_size']

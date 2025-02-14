@@ -1,0 +1,4 @@
+#SYNTHETIC
+input_size: 3 #num_features/channels
+output_size: 10 #num_classes
+flatten_input: False

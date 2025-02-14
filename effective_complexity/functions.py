@@ -57,7 +57,9 @@ def train_loop(train_loader, model, criterion, optimizer, device = 'cpu'):
         unembedding = model.get_unembeddings(one_hots)
 
         #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
-        logits = torch.matmul(f_x, unembedding)
+        logits = torch.matmul(f_x, unembedding.t())
+        #print(f_x.shape, unembedding.shape)
+        #logits=torch.dot(f_x, unembedding)
 
 
 
@@ -108,7 +110,7 @@ def val_loop(val_loader, model, criterion, device = 'cpu'):
             unembedding = model.get_unembeddings(one_hots)
 
             #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
-            logits = torch.matmul(f_x, unembedding)
+            logits = torch.matmul(f_x, unembedding.t())
 
 
             outputs = logsoftmax(logits)
@@ -154,7 +156,7 @@ def test_loop(test_loader, model, criterion, device='cpu'):
             unembedding = model.get_unembeddings(one_hots)
 
             #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
-            logits = torch.matmul(f_x, unembedding)
+            logits = torch.matmul(f_x, unembedding.t())
 
             outputs = logsoftmax(logits)
 

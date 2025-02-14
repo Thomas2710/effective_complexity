@@ -21,6 +21,10 @@ def model_mlp(hyperparams):
     from effective_complexity.models.mlp import model_mlp as mm
     return mm(hyperparams)
 
+def model_cnn(hyperparams):
+    from effective_complexity.models.cnn import model_cnn as mc
+    return mc(hyperparams)
+
 def list_models():
     models = [n.replace('model_', '')  for n, m in globals().items()
             if n.startswith('model_')]
