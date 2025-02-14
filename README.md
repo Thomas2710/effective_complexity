@@ -16,16 +16,21 @@ Activate the virtual environment
 poetry shell
 ```
 Then install the package with 
-'''
+```
 pip install -e .
-'''
+```
 
 Enter the main folder of the project
-'''
+```
 cd effective_complexity
-'''
+```
 
 Run the experiment with 
-'''
+```
 ec run -m __model_name__ -d __dataset_name__
-'''
+```
+
+or, with default settings:
+```
+ec run
+```
