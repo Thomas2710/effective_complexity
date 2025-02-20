@@ -41,7 +41,7 @@ def train_loop(train_loader, model, criterion, optimizer, device = 'cpu'):
     total = 0
     correct = 0
 
-    d = model.get_W().shape[1]
+    d = model.get_W().shape[0]
     one_hots = torch.eye(d).float()
 
 
@@ -57,7 +57,7 @@ def train_loop(train_loader, model, criterion, optimizer, device = 'cpu'):
         unembedding = model.get_unembeddings(one_hots)
 
         #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
-        logits = torch.matmul(f_x, unembedding.t())
+        logits = torch.matmul(f_x, unembedding)
         #print(f_x.shape, unembedding.shape)
         #logits=torch.dot(f_x, unembedding)
 
@@ -92,7 +92,7 @@ def val_loop(val_loader, model, criterion, device = 'cpu'):
     correct = 0
     logsoftmax = nn.LogSoftmax(dim=-1)
 
-    d = model.get_W().shape[1]
+    d = model.get_W().shape[0]
     one_hots = torch.eye(d).float()
 
 
@@ -110,7 +110,7 @@ def val_loop(val_loader, model, criterion, device = 'cpu'):
             unembedding = model.get_unembeddings(one_hots)
 
             #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
-            logits = torch.matmul(f_x, unembedding.t())
+            logits = torch.matmul(f_x, unembedding)
 
 
             outputs = logsoftmax(logits)
@@ -137,9 +137,9 @@ def test_loop(test_loader, model, criterion, device='cpu'):
     correct = 0
     logsoftmax = nn.LogSoftmax(dim=-1)
     total_fx = []
-    d = model.get_W().shape[1]
-    one_hots = torch.eye(d).float()
 
+    d = model.get_W().shape[0]
+    one_hots = torch.eye(d).float()
 
 
     with torch.no_grad():  # No need to track gradients
@@ -152,11 +152,11 @@ def test_loop(test_loader, model, criterion, device='cpu'):
             #Compute f_x from output
             f_x = model.get_fx(outputs)
             total_fx.append(f_x)
-            #Compute unenmbed from output
+            #Compute unembeddings
             unembedding = model.get_unembeddings(one_hots)
 
             #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
-            logits = torch.matmul(f_x, unembedding.t())
+            logits = torch.matmul(f_x, unembedding)
 
             outputs = logsoftmax(logits)
 

@@ -18,8 +18,8 @@ def model_cnn(hyperparams):
 
             # Fully connected layers
             self.fc1 = nn.Linear(64 * 4 * 4, 128)  # Adjust based on input size
-            self.fc2 = nn.Linear(128, num_classes)
-            self.label_embedding = nn.Linear(num_classes, 128)
+            #self.fc2 = nn.Linear(128, num_classes)
+            self.W = nn.Linear(128, 10)
 
         def forward(self, x):
             x = self.pool(F.relu(self.conv1(x)))
@@ -37,10 +37,11 @@ def model_cnn(hyperparams):
             return x
         
         def get_unembeddings(self, y):
-            return self.label_embedding(y)
+            print('in unembeddins, shape of W is ', self.W.weight.shape, 'shape of y is', y.shape)
+            return torch.matmul(self.W.weight.t(),y)
         
         def get_W(self):
-            return self.label_embedding.weight
+            return self.W.weight
         
     flatten_input = hyperparams['flatten_input']
     input_size = hyperparams['input_size']
