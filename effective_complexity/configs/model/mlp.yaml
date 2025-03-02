@@ -1,7 +1,6 @@
 #SYNTHETIC
 input_size: 3
 hidden_sizes: [32,64,32]
-output_size: 3
 flatten_input: False
 
 

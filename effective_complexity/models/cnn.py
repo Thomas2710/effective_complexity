@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 def model_cnn(hyperparams):
     class CNN(nn.Module, DistributionComponents):
-        def __init__(self, input_size,num_classes=10):
+        def __init__(self, input_size,embedding_size=10, output_size=3):
             super(CNN, self).__init__()
 
             # Convolutional layers
@@ -18,8 +18,8 @@ def model_cnn(hyperparams):
 
             # Fully connected layers
             self.fc1 = nn.Linear(64 * 4 * 4, 128)  # Adjust based on input size
-            #self.fc2 = nn.Linear(128, num_classes)
-            self.W = nn.Linear(128, 10)
+            self.fx = nn.Linear(128, embedding_size)
+            self.W = nn.Linear(embedding_size, output_size)
 
         def forward(self, x):
             x = self.pool(F.relu(self.conv1(x)))
@@ -29,22 +29,22 @@ def model_cnn(hyperparams):
             x = torch.flatten(x, start_dim=1)  # Flatten for FC layers
 
             x = F.relu(self.fc1(x))
-            #x = self.fc2(x)  # No activation (applied in loss function)
+            output = self.fx(x)  # No activation (extracting embeddings)
 
-            return x
+            return output
         
         def get_fx(self, x):
             return x
         
         def get_unembeddings(self, y):
-            print('in unembeddins, shape of W is ', self.W.weight.shape, 'shape of y is', y.shape)
             return torch.matmul(self.W.weight.t(),y)
         
         def get_W(self):
             return self.W.weight
-        
+    
+    embedding_size = hyperparams['embedding_size']
     flatten_input = hyperparams['flatten_input']
     input_size = hyperparams['input_size']
-    output_size = hyperparams['output_size']
-    model = CNN(input_size, num_classes=output_size)
+    num_classes = hyperparams['num_classes']
+    model = CNN(input_size, embedding_size=embedding_size, output_size=num_classes)
     return model

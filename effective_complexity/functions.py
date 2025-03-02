@@ -11,26 +11,10 @@ l2_lambda = 1e-4
 l1_weight = 0
 l2_weight = 0
 
-def compute_distrib(f_x, W, log = False):
-    one_hots = torch.eye(W.shape[0]).float()
-    logits = [torch.matmul(f_x.float(), (torch.matmul(W, one_hots[i]).t())) for i in range(3)]
-    logits = torch.stack(logits)
-
-    if log:
-        softmax = nn.LogSoftmax(dim=0)
-    else:
-        softmax = nn.Softmax(dim=0)
-
-    label = softmax(logits)
-    assert label[0]+label[1]+label[2] < 1 + eps and label[0]+label[1]+label[2] > 1 - eps
-    
-    return label
-
 def elastic_net_regularization(model, l1_lambda, l2_lambda, l1_weight, l2_weight):
     l1_penalty = sum(p.abs().sum() for p in model.parameters())  # L1 norm
     l2_penalty = sum((p ** 2).sum() for p in model.parameters())  # L2 norm
     return l1_weight * l1_lambda * l1_penalty + l2_weight * l2_lambda * l2_penalty
-
 
 
 def train_loop(train_loader, model, criterion, optimizer, device = 'cpu'):
@@ -49,13 +33,11 @@ def train_loop(train_loader, model, criterion, optimizer, device = 'cpu'):
         optimizer.zero_grad()
         labels = batch['label'].to(device)
         inputs = batch['x'].to(device)
-        outputs = model(inputs)
-
+        embedding_output = model(inputs)
         #Compute f_x from output
-        f_x = model.get_fx(outputs)
+        f_x = model.get_fx(embedding_output)
         #Compute unenmbed from output
         unembedding = model.get_unembeddings(one_hots)
-
         #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
         logits = torch.matmul(f_x, unembedding)
         #print(f_x.shape, unembedding.shape)

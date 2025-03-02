@@ -36,17 +36,23 @@ def run(model, dataset):
     with open(os.path.join(os.getcwd(), 'configs', 'general.yaml'), 'r') as file:
         general_hyperparams = yaml.safe_load(file)
 
-    
+    #Load dataset
+    from effective_complexity.datasets import get_dataset_class
+    dataset_class = get_dataset_class(dataset)
+    dataset_hyperparams['embedding_size'] = general_hyperparams['embedding_size']
+    dataloader = dataset_class[0](dataset_hyperparams)
+
+    #Get dataset number of classes
+    batch_sample = next(iter(dataloader[0]))
+    num_classes = batch_sample['label'].shape[1]
 
     #Load model
     from effective_complexity.models import get_model_class
     model_class = get_model_class(model)
-    model = model_class[0](model_hyperparams)
+    model_hyperparams['embedding_size'] = general_hyperparams['embedding_size']
 
-    #Load dataset
-    from effective_complexity.datasets import get_dataset_class
-    dataset_class = get_dataset_class(dataset)
-    dataloader = dataset_class[0](dataset_hyperparams)
+    model_hyperparams['num_classes'] = num_classes
+    model = model_class[0](model_hyperparams)
 
 
     hyperparams = (general_hyperparams, model_hyperparams, dataset_hyperparams)

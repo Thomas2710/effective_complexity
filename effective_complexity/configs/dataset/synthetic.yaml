@@ -6,3 +6,5 @@ hidden_sizes: [64,32,64]
 output_size: 3
 num_samples: 1000
 BATCH_SIZE: 256
+flatten_input: False
+num_classes: 3

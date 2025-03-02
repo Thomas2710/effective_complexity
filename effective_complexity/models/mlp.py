@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 def model_mlp(hyperparams):
     class MLP(nn.Module, DistributionComponents):
-        def __init__(self, input_size, hidden_sizes, output_size, flatten_input=False):
+        def __init__(self, input_size, hidden_sizes, embedding_size=3,output_size=3, flatten_input=False):
             super(MLP, self).__init__()
             # Define layers
             self.flatten = flatten_input
@@ -14,8 +14,8 @@ def model_mlp(hyperparams):
             for hidden_size in hidden_sizes:
                 self.layers.append(nn.Linear(in_features, hidden_size))
                 in_features = hidden_size
-            self.W = nn.Linear(in_features, output_size)
-            #self.label_embedding = nn.Linear(output_size, in_features)
+            self.fx = nn.Linear(in_features, embedding_size)
+            self.W = nn.Linear(embedding_size, output_size)
 
         def forward(self, x):
             if self.flatten:
@@ -25,11 +25,13 @@ def model_mlp(hyperparams):
             for layer in self.layers:
                 x = F.relu(layer(x))
             # Output layer
+            x = self.fx(x)
             return x
         
         def get_fx(self, x):
             return x
         
+        #Probably needs to change
         def get_unembeddings(self, y):
             return torch.matmul(self.W.weight.t(),y)
         
@@ -39,6 +41,7 @@ def model_mlp(hyperparams):
     flatten_input = hyperparams['flatten_input']
     input_size = hyperparams['input_size']
     hidden_sizes = hyperparams['hidden_sizes']
-    output_size = hyperparams['output_size']
-    model = MLP(input_size, hidden_sizes, output_size, flatten_input)
+    embedding_size = hyperparams['embedding_size']
+    num_classes = hyperparams['num_classes']
+    model = MLP(input_size, hidden_sizes,embedding_size, num_classes, flatten_input)
     return model
