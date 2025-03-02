@@ -43,7 +43,7 @@ def show_gaussian(samples, reference = True):
     plt.legend()
     plt.show()
 
-def show_distrib(distrib, method = 'NOT', predicted = True, show = False):
+def show_distrib(distrib, method = 'NOT', predicted = True, show = False, experiment = ('SYNTHETIC', 'MLP')):
 
     dim = distrib.shape[1]
     if predicted:
@@ -72,7 +72,7 @@ def show_distrib(distrib, method = 'NOT', predicted = True, show = False):
     
     # Create the folder
     # Get the current time formatted as HH-MM-SS
-    folder_name = datetime.now().strftime("%H-%M-%S")
+    folder_name = ''+experiment[0]+'_'+experiment[1]+'_'+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     folder_path = os.path.join(os.getcwd(), 'PLOTS', folder_name)
     os.makedirs(folder_path, exist_ok=True)
     plt.savefig(os.path.join(folder_path, ''+exp+'_'+str(dim)+'dim_'+method+'.png'))

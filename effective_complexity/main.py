@@ -67,12 +67,15 @@ def identify(dataloaders, model, hyperparams):
     pcareduced_distrib = apply_pca(real_distrib)
     tsnereduced_distrib = apply_tsne(real_distrib)
 
+
+    model_name = model.__class__.__name__
+    dataset_name = train_loader.dataset.__class__.__name__
     #show_distrib(predicted_distrib, predicted=True)
-    show_distrib(pcareduced_pred_distrib, method='PCA', predicted=True)
-    show_distrib(tsnereduced_pred_distrib, method='TSNE', predicted=True)
+    show_distrib(pcareduced_pred_distrib, method='PCA', predicted=True, experiment = (dataset_name, model_name))
+    show_distrib(tsnereduced_pred_distrib, method='TSNE', predicted=True, experiment = (dataset_name, model_name))
     #show_distrib(real_distrib, predicted=False)
-    show_distrib(pcareduced_distrib, method='PCA', predicted=False)
-    show_distrib(tsnereduced_distrib, method='TSNE', predicted=False)
+    show_distrib(pcareduced_distrib, method='PCA', predicted=False, experiment = (dataset_name, model_name))
+    show_distrib(tsnereduced_distrib, method='TSNE', predicted=False, experiment = (dataset_name, model_name))
 
     
 
