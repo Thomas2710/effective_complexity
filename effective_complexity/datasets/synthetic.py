@@ -96,6 +96,7 @@ def dataset_synthetic(hyperparams):
         #generate f_x
         # Instantiate the MLP (f(x))
         model_class = get_model_class('mlp')
+        hyperparams['embedding_size'] = 3
         mlp_model = model_class[0](hyperparams)
         #mlp_model.apply(initialize_weights)
         

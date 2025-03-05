@@ -72,7 +72,7 @@ def show_distrib(distrib, method = 'NOT', predicted = True, show = False, experi
     
     # Create the folder
     # Get the current time formatted as HH-MM-SS
-    folder_name = ''+experiment[0]+'_'+experiment[1]+'_'+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    folder_name = ''+experiment[0]+'_'+experiment[1]+'_'+datetime.now().strftime("%Y-%m-%d %H:%M")
     folder_path = os.path.join(os.getcwd(), 'PLOTS', folder_name)
     os.makedirs(folder_path, exist_ok=True)
     plt.savefig(os.path.join(folder_path, ''+exp+'_'+str(dim)+'dim_'+method+'.png'))
@@ -81,14 +81,15 @@ def show_distrib(distrib, method = 'NOT', predicted = True, show = False, experi
     plt.close()
 
 
-def apply_pca(data):
+def apply_pca(data, num_components=2):
     # Apply PCA to reduce to 2 dimensions
-    pca = PCA(n_components=2)
+    pca = PCA(n_components=num_components)
     pca_result = pca.fit_transform(data)
-    return pca_result
+    data_reconstructed = pca.inverse_transform(pca_result)
+    return pca_result, data_reconstructed
 
-def apply_tsne(data):
+def apply_tsne(data, num_components=2, perplexity=30, random_state=42):
     # Apply t-SNE to reduce to 2 dimensions for visualization
-    tsne = TSNE(n_components=2, perplexity=30, random_state=42)
+    tsne = TSNE(n_components=num_components, perplexity=perplexity, random_state=random_state)
     tsne_result = tsne.fit_transform(data)
     return tsne_result

@@ -42,6 +42,7 @@ def model_mlp(hyperparams):
     input_size = hyperparams['input_size']
     hidden_sizes = hyperparams['hidden_sizes']
     embedding_size = hyperparams['embedding_size']
+    print('embedding_size:', embedding_size)
     num_classes = hyperparams['num_classes']
     model = MLP(input_size, hidden_sizes,embedding_size, num_classes, flatten_input)
     return model
