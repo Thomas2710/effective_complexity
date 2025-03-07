@@ -25,8 +25,12 @@ from effective_complexity.globals import *
               help='Models that satisfy paper property', multiple=False)
 @click.option('-d', '--dataset', type=click.Choice([*DATASETS_ALL]), default='synthetic',
               help='Datasets', multiple=False)
+@click.option('-t', '--train', is_flag=True,
+              help='Train model')
+@click.option('-v', '--verbose', is_flag=True,
+              help='Enables verbose mode')
 
-def run(model, dataset):
+def run(model, dataset, train, verbose):
     #Run checks and load right configuration
     # Load hyperparameters from YAML file
     with open(os.path.join(os.getcwd(), 'configs', 'model',''+model+'.yaml'), 'r') as file:
@@ -36,6 +40,14 @@ def run(model, dataset):
     with open(os.path.join(os.getcwd(), 'configs', 'general.yaml'), 'r') as file:
         general_hyperparams = yaml.safe_load(file)
 
+    if not model_hyperparams:
+        model_hyperparams = dict()
+    if not dataset_hyperparams:
+        dataset_hyperparams = dict()
+    if not general_hyperparams:
+        general_hyperparams = dict()
+
+        
     #Load dataset
     from effective_complexity.datasets import get_dataset_class
     dataset_class = get_dataset_class(dataset)
@@ -58,5 +70,5 @@ def run(model, dataset):
     hyperparams = (general_hyperparams, model_hyperparams, dataset_hyperparams)
     #Run main function
     from effective_complexity.main import identify
-    identify(dataloader, model, hyperparams)
+    identify(dataloader, model, hyperparams, train)
  

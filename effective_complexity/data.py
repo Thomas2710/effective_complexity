@@ -7,8 +7,7 @@ import torch
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import os
-import os
-from datetime import datetime
+
 
 matplotlib.use('Qt5Agg')  # Use an interactive backend like TkAgg
 
@@ -43,7 +42,7 @@ def show_gaussian(samples, reference = True):
     plt.legend()
     plt.show()
 
-def show_distrib(distrib, method = 'NOT', predicted = True, show = False, experiment = ('SYNTHETIC', 'MLP')):
+def show_distrib(distrib, folder_path, method = 'NOT', predicted = True, show = False):
 
     dim = distrib.shape[1]
     if predicted:
@@ -72,9 +71,8 @@ def show_distrib(distrib, method = 'NOT', predicted = True, show = False, experi
     
     # Create the folder
     # Get the current time formatted as HH-MM-SS
-    folder_name = ''+experiment[0]+'_'+experiment[1]+'_'+datetime.now().strftime("%Y-%m-%d %H:%M")
-    folder_path = os.path.join(os.getcwd(), 'PLOTS', folder_name)
-    os.makedirs(folder_path, exist_ok=True)
+
+    
     plt.savefig(os.path.join(folder_path, ''+exp+'_'+str(dim)+'dim_'+method+'.png'))
     if show:
         plt.show()

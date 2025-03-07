@@ -25,6 +25,10 @@ def model_cnn(hyperparams):
     from effective_complexity.models.cnn import model_cnn as mc
     return mc(hyperparams)
 
+def model_resnet(hyperparams):
+    from effective_complexity.models.resnet import model_resnet as mr
+    return mr(hyperparams)
+
 def list_models():
     models = [n.replace('model_', '')  for n, m in globals().items()
             if n.startswith('model_')]

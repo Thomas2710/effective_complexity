@@ -16,4 +16,5 @@ from .models import *
 from .cnn import *
 from .gpt2 import *
 from .mlp import *
+from .resnet import *
 

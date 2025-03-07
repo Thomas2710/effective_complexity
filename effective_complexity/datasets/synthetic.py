@@ -103,12 +103,8 @@ def dataset_synthetic(hyperparams):
 
 
         embedding_outputs = mlp_model(samples)
-        print('embedding_outputs shape:', embedding_outputs.shape) #Should be (num_samples, embedding_size)
         f_x = mlp_model.get_fx(embedding_outputs)
-        print('fx shape:', f_x.shape) #Should be (num_samples, embedding_size)
         unembedding = torch.matmul(W, one_hots)
-        print('Unembedding shape:', unembedding.shape)
-        print('Unembeddings are:', unembedding)
         logits = torch.matmul(f_x, unembedding)
 
         # Define the softmax layer

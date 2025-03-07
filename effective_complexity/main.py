@@ -7,12 +7,14 @@ import torch.nn as nn
 import torch
 from tqdm import tqdm
 import torch.optim as optim
+import os
+from datetime import datetime
 
 from effective_complexity.functions import train_loop, val_loop, test_loop
 from torch.utils.data import DataLoader
 
 
-def identify(dataloaders, model, hyperparams):
+def identify(dataloaders, model, hyperparams, train):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     #train_dataset, val_dataset, test_dataset = dataset
@@ -23,33 +25,42 @@ def identify(dataloaders, model, hyperparams):
     epochs = general_hyperparams['num_epochs']
     lr = general_hyperparams['learning_rate']
     embedding_size = general_hyperparams['embedding_size']
+
+    model_name = model.__class__.__name__
+    dataset_name = train_loader.dataset.__class__.__name__
+    folder_name = ''+dataset_name+'_'+model_name+'_'+datetime.now().strftime("%Y-%m-%d %H:%M")
+
     
-
-    #LOAD DATALOADERS
-    #train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, collate_fn=collate_fn)
-    #val_loader = DataLoader(val_dataset, batch_size = 128, shuffle = True, collate_fn=collate_fn)
-    #test_loader = DataLoader(test_dataset, batch_size = BATCH_SIZE, shuffle = True, collate_fn=collate_fn)
-
-
-    #INSTANTIATE MODEL
-    #TRAIN MODEL MINIMIZING KL DIVERGENCE 
-    #test_model = MLP(input_size, hidden_sizes, output_size)
+    # Initialize training 
     test_model = model
     criterion = nn.KLDivLoss(size_average=None, reduce=None, reduction='batchmean', log_target=False)
     optimizer = optim.Adam(test_model.parameters(), lr=lr)
+    best_val_loss = float('inf')
 
-    test_model.to(device)
+    checkpoints_folder_path = os.path.join(os.getcwd(), 'CHECKPOINTS', folder_name)
+    os.makedirs(checkpoints_folder_path, exist_ok=True)
 
-    # Print epoch loss
-    print('Training ...')
-    progress_bar = tqdm(range(epochs))
-    for epoch in progress_bar:
-        train_loss, train_acc = train_loop(train_loader,test_model, criterion, optimizer, device)
-        val_loss, val_acc = val_loop(val_loader, test_model, criterion, device)
+    if not train:
+        print('Testing...')
+        model_path = os.path.join(checkpoints_folder_path, 'best_model.pth')
+        if not os.path.isfile(model_path):
+            print(f"No model found at {model_path}.")
+            return
+        test_model.to(device)
+        # Print epoch loss
+        print('Training ...')
+        progress_bar = tqdm(range(epochs))
+        for epoch in progress_bar:
+            train_loss, train_acc = train_loop(train_loader,test_model, criterion, optimizer, device)
+            val_loss, val_acc = val_loop(val_loader, test_model, criterion, device)
 
-        progress_bar.set_postfix(Epoch = f"[{epoch+1}/{epochs}]")
-        progress_bar.set_postfix(Train = f"Loss: {train_loss:.4f}, Acc: {train_acc:.4f}" )
-        progress_bar.set_postfix(Val = f"Loss: {val_loss:.4f}, Acc: {val_acc:.4f}")
+            progress_bar.set_postfix(Epoch = f"[{epoch+1}/{epochs}]")
+            progress_bar.set_postfix(Train = f"Loss: {train_loss:.4f}, Acc: {train_acc:.4f}" )
+            progress_bar.set_postfix(Val = f"Loss: {val_loss:.4f}, Acc: {val_acc:.4f}")
+
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                torch.save(test_model.state_dict(), os.path.join(checkpoints_folder_path, 'best_model.pth'))
 
     # Final Test Evaluation
     test_loss, test_acc, predictions = test_loop(test_loader, test_model, criterion, device)
@@ -71,6 +82,13 @@ def identify(dataloaders, model, hyperparams):
         reconstruction_error = np.mean((predicted_distrib.cpu().numpy() - reconstructed_data) ** 2)
         errors.append(reconstruction_error)
 
+
+
+    
+    plots_folder_path = os.path.join(os.getcwd(), 'PLOTS', folder_name)
+    os.makedirs(plots_folder_path, exist_ok=True)
+
+
     # Plot Reconstruction Error vs. Number of Components
     plt.figure(figsize=(8, 5))
     plt.plot(num_components, errors, marker='o', linestyle='-')
@@ -78,7 +96,8 @@ def identify(dataloaders, model, hyperparams):
     plt.ylabel("Reconstruction Error (MSE)")
     plt.title("PCA Reconstruction Error vs. Number of Components")
     plt.grid(True)
-    plt.show()
+    plt.savefig(os.path.join(plots_folder_path, 'PCA_analysis.png'))
+    #plt.show()
 
     min_index = errors[:3].index(min(errors[:3]))
     print('num optimal dimensions:', min_index + 1)
@@ -87,19 +106,15 @@ def identify(dataloaders, model, hyperparams):
         pcareduced_pred_distrib, reconstructed_data = apply_pca(predicted_distrib, num_components=num_components)
         tsnereduced_pred_distrib = apply_tsne(predicted_distrib, num_components=num_components)
 
-
-        
         pcareduced_distrib, _ = apply_pca(real_distrib, num_components=num_components)
         tsnereduced_distrib = apply_tsne(real_distrib, num_components=num_components)
 
-        model_name = model.__class__.__name__
-        dataset_name = train_loader.dataset.__class__.__name__
         #show_distrib(predicted_distrib, predicted=True)
-        show_distrib(pcareduced_pred_distrib, method='PCA', predicted=True, experiment = (dataset_name, model_name))
-        show_distrib(tsnereduced_pred_distrib, method='TSNE', predicted=True, experiment = (dataset_name, model_name))
+        show_distrib(pcareduced_pred_distrib, plots_folder_path, method='PCA', predicted=True)
+        show_distrib(tsnereduced_pred_distrib, plots_folder_path, method='TSNE', predicted=True)
         #show_distrib(real_distrib, predicted=False)
-        show_distrib(pcareduced_distrib, method='PCA', predicted=False, experiment = (dataset_name, model_name))
-        show_distrib(tsnereduced_distrib, method='TSNE', predicted=False, experiment = (dataset_name, model_name))
+        show_distrib(pcareduced_distrib, plots_folder_path, method='PCA', predicted=False)
+        show_distrib(tsnereduced_distrib, plots_folder_path,  method='TSNE', predicted=False)
 
     
 

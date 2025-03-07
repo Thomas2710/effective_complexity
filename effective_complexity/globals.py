@@ -20,6 +20,7 @@ _MODEL_FRIENDLY_NAME_MAP = dict(
     mlp='MLP',
     gpt='GPT',
     cnn='CNN',
+    resnet='RESNET',
 )
 MODELS_ALL = {k: _MODEL_FRIENDLY_NAME_MAP.get(k, k)
                 for k in list_models()}
