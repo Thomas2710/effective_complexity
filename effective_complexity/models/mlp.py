@@ -20,7 +20,7 @@ def model_mlp(hyperparams):
         def forward(self, x):
             if self.flatten:
                 x = x.reshape(x.shape[0], 32 * 32 * 3)
-
+            
             # Pass input through each layer with ReLU activation
             for layer in self.layers:
                 x = F.relu(layer(x))
@@ -42,7 +42,6 @@ def model_mlp(hyperparams):
     input_size = hyperparams['input_size']
     hidden_sizes = hyperparams['hidden_sizes']
     embedding_size = hyperparams['embedding_size']
-    print('embedding_size:', embedding_size)
     num_classes = hyperparams['num_classes']
     model = MLP(input_size, hidden_sizes,embedding_size, num_classes, flatten_input)
     return model

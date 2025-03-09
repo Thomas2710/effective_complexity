@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.11"
 numpy = "^2.2.1"
 matplotlib = "^3.10.0"
+ipykernel = "^6.29.5"
 
 [tool.poetry.scripts]
 ec = "effective_complexity.ec:start"

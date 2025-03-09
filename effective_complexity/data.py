@@ -53,7 +53,7 @@ def show_distrib(distrib, folder_path, method = 'NOT', predicted = True, show = 
     if dim == 2:
         plt.figure(figsize=(8, 6))
         plt.scatter(distrib[:, 0], distrib[:, 1], c='blue', alpha=0.6)
-        plt.title(f"{method.upper()} Reduced Visualization of Data (2D)") 
+        plt.title(f"{method.upper()} Reduced Visualization of {exp} Data (2D)") 
         plt.xlabel("Dimension 1")
         plt.ylabel("Dimension 2")
     
@@ -62,7 +62,7 @@ def show_distrib(distrib, folder_path, method = 'NOT', predicted = True, show = 
         fig = plt.figure(figsize=(8, 6))
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(distrib[:, 0], distrib[:, 1], distrib[:, 2], c='blue', alpha=0.6)
-        ax.set_title(f"{method.upper()} Reduced Visualization of Data (3D)")
+        ax.set_title(f"{method.upper()} Reduced Visualization of {exp} Data (3D)")
         ax.set_xlabel("Dimension 1")
         ax.set_ylabel("Dimension 2")
         ax.set_zlabel("Dimension 3")

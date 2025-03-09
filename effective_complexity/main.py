@@ -47,6 +47,7 @@ def identify(dataloaders, model, hyperparams, train):
             print(f"No model found at {model_path}.")
             return
         test_model.to(device)
+    else:
         # Print epoch loss
         print('Training ...')
         progress_bar = tqdm(range(epochs))
@@ -63,7 +64,7 @@ def identify(dataloaders, model, hyperparams, train):
                 torch.save(test_model.state_dict(), os.path.join(checkpoints_folder_path, 'best_model.pth'))
 
     # Final Test Evaluation
-    test_loss, test_acc, predictions = test_loop(test_loader, test_model, criterion, device)
+    test_loss, test_acc, embeddings, predicted_distrib = test_loop(test_loader, test_model, criterion, device)
     print("\nFinal Test Results")
     print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_acc:.4f}")
     
@@ -74,12 +75,11 @@ def identify(dataloaders, model, hyperparams, train):
     errors = []
 
 
-    predicted_distrib = torch.cat(predictions)
-    real_distrib = torch.cat([batch['label'] for batch in test_loader])
+    embeddings = torch.cat(embeddings)
     # Compute reconstruction error for different numbers of components
     for n in num_components:
-        pcareduced_distrib, reconstructed_data = apply_pca(predicted_distrib, num_components=n)
-        reconstruction_error = np.mean((predicted_distrib.cpu().numpy() - reconstructed_data) ** 2)
+        pcareduced_distrib, reconstructed_data = apply_pca(embeddings, num_components=n)
+        reconstruction_error = np.mean((embeddings.cpu().numpy() - reconstructed_data) ** 2)
         errors.append(reconstruction_error)
 
 
@@ -99,6 +99,8 @@ def identify(dataloaders, model, hyperparams, train):
     plt.savefig(os.path.join(plots_folder_path, 'PCA_analysis.png'))
     #plt.show()
 
+    predicted_distrib = predicted_distrib
+    real_distrib = torch.cat([batch['label'] for batch in test_loader])
     min_index = errors[:3].index(min(errors[:3]))
     print('num optimal dimensions:', min_index + 1)
     if min_index < 4: #Must be

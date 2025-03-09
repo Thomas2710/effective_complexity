@@ -1,17 +1,3 @@
-# Copyright 2023 Janek Bevendorff
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import os
 import logging
 import click
@@ -52,6 +38,11 @@ def run(model, dataset, train, verbose):
     from effective_complexity.datasets import get_dataset_class
     dataset_class = get_dataset_class(dataset)
     dataset_hyperparams['embedding_size'] = general_hyperparams['embedding_size']
+    if dataset == 'synthetic' and (model == 'resnet' or model == 'cnn'):
+        dataset_hyperparams['DIMS'] = [3,32,32]
+        dataset_hyperparams['hidden_sizes'] = [1024, 512, 10]
+        dataset_hyperparams['flatten_input'] = True
+        dataset_hyperparams['input_size'] = 32*32*3
     dataloader = dataset_class[0](dataset_hyperparams)
 
     #Get dataset number of classes

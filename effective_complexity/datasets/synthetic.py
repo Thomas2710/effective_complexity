@@ -20,6 +20,7 @@ def dataset_synthetic(hyperparams):
                 data (list of dicts): Each dictionary represents a data point with keys as feature names.
             """
             self.data = []
+            self.f_x = None
 
         def __len__(self):
             """Returns the number of samples in the dataset."""
@@ -59,6 +60,15 @@ def dataset_synthetic(hyperparams):
             if not isinstance(items, dict):
                 raise ValueError("Item must be a dict.")
             self.data= [dict(zip(items.keys(), values)) for values in zip(*items.values())]
+        
+        def add_embeddings(self, embeddings):
+            """
+            Adds embeddings to the dataset.
+
+            Args:
+                embeddings (tensor): A tensor containing the embeddings.
+            """
+            self.f_x  = embeddings
     
     train_percent=0.7
     test_percent = 0.2
@@ -72,6 +82,7 @@ def dataset_synthetic(hyperparams):
     BATCH_SIZE = hyperparams['BATCH_SIZE']
     num_classes = hyperparams['num_classes']
     
+    
     one_hots = torch.eye(num_classes).float()
 
     train_dataset = SYNTHETIC()
@@ -79,13 +90,21 @@ def dataset_synthetic(hyperparams):
     val_dataset = SYNTHETIC()
 
     with torch.no_grad():
-        #Generate data and W
-        mu_sample = np.full(DIMS,MU)
-        covariance_sample = np.diag(np.full(DIMS,COV))
+        # Create a random tensor of 3 dimensions with Gaussian distribution
+        if not isinstance(DIMS, int):
+            random_tensors = []
+            for _ in range(num_samples):
+                tensor = torch.randn(DIMS)
+                random_tensors.append(tensor)
+            samples = torch.stack(random_tensors)
+        else:
+            #Generate data and W
+            mu_sample = np.full(DIMS,MU)
+            covariance_sample = np.diag(np.full(DIMS,COV))
 
-        # Sample points
-        samples = np.random.multivariate_normal(mu_sample, covariance_sample, num_samples)
-        samples = torch.from_numpy(samples).float()
+            # Sample points
+            samples = np.random.multivariate_normal(mu_sample, covariance_sample, num_samples)
+            samples = torch.from_numpy(samples).float()
         #Define orthogonal vectors
         w1 = torch.tensor([1,1,1])
         w2 = torch.tensor([1,-1,0])
@@ -119,13 +138,13 @@ def dataset_synthetic(hyperparams):
 
         #Add to the dataset
         train_end_index = math.floor(num_samples*train_percent)
-        train_dataset.add_items({'x':f_x[:train_end_index, :] , 'label':distrib[:train_end_index, :]})
+        train_dataset.add_items({'x':samples[:train_end_index, :] , 'label':distrib[:train_end_index, :]})
         val_start_index = train_end_index
         val_end_index = math.floor(num_samples*(train_percent+val_percent))
-        val_dataset.add_items({'x':f_x[val_start_index:val_end_index, :], 'label': distrib[val_start_index:val_end_index, :]})
+        val_dataset.add_items({'x':samples[val_start_index:val_end_index, :], 'label': distrib[val_start_index:val_end_index, :]})
         test_start_index = val_end_index
-        test_dataset.add_items({'x': f_x[test_start_index:, :], 'label':distrib[test_start_index:, :]})
-
+        test_dataset.add_items({'x': samples[test_start_index:, :], 'label':distrib[test_start_index:, :]})
+        test_dataset.add_embeddings(f_x[test_start_index:, :])
 
     train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, collate_fn=collate_fn)
     val_loader = DataLoader(val_dataset, batch_size = 128, shuffle = True, collate_fn=collate_fn)

@@ -38,10 +38,7 @@ def train_loop(train_loader, model, criterion, optimizer, device = 'cpu'):
         f_x = model.get_fx(embedding_output)
         #Compute unenmbed from output
         unembedding = model.get_unembeddings(one_hots)
-        #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
         logits = torch.matmul(f_x, unembedding)
-        #print(f_x.shape, unembedding.shape)
-        #logits=torch.dot(f_x, unembedding)
 
 
 
@@ -91,7 +88,6 @@ def val_loop(val_loader, model, criterion, device = 'cpu'):
             #Compute unenmbed from output
             unembedding = model.get_unembeddings(one_hots)
 
-            #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
             logits = torch.matmul(f_x, unembedding)
 
 
@@ -118,6 +114,7 @@ def test_loop(test_loader, model, criterion, device='cpu'):
     total = 0
     correct = 0
     logsoftmax = nn.LogSoftmax(dim=-1)
+    softmax = nn.Softmax(dim=-1)
     total_fx = []
 
     d = model.get_W().shape[0]
@@ -128,7 +125,6 @@ def test_loop(test_loader, model, criterion, device='cpu'):
         for batch in test_loader:
             inputs = batch['x'].to(device)
             labels = batch['label'].to(device)
-
             outputs = model(inputs)
 
             #Compute f_x from output
@@ -137,10 +133,10 @@ def test_loop(test_loader, model, criterion, device='cpu'):
             #Compute unembeddings
             unembedding = model.get_unembeddings(one_hots)
 
-            #print("f_x shape is:", f_x.shape, 'unembedding shape is:', unembedding.shape)
             logits = torch.matmul(f_x, unembedding)
 
             outputs = logsoftmax(logits)
+            outputs_to_return = softmax(logits)
 
             loss = criterion(outputs, labels)
             loss += elastic_net_regularization(model, l1_lambda, l2_lambda, l1_weight, l2_weight)
@@ -154,5 +150,4 @@ def test_loop(test_loader, model, criterion, device='cpu'):
 
     avg_loss = total_loss / len(test_loader)
     #accuracy = correct / total
-    return avg_loss, accuracy, total_fx
-            
+    return avg_loss, accuracy, total_fx, outputs_to_return
