@@ -42,13 +42,13 @@ def show_gaussian(samples, reference = True):
     plt.legend()
     plt.show()
 
-def show_distrib(distrib, folder_path, method = 'NOT', predicted = True, show = False):
-
+def show_distrib(distrib, method = 'NO', predicted = True, ax = None):
     dim = distrib.shape[1]
     if predicted:
         exp = 'predicted'
     else:
         exp = 'reference'
+    '''
     # Plotting 2D data
     if dim == 2:
         plt.figure(figsize=(8, 6))
@@ -68,15 +68,22 @@ def show_distrib(distrib, folder_path, method = 'NOT', predicted = True, show = 
         ax.set_zlabel("Dimension 3")
     else:
         raise ValueError("target_dim must be 2 or 3.")
-    
-    # Create the folder
-    # Get the current time formatted as HH-MM-SS
+    '''
+    if dim == 2:
+        ax.scatter(distrib[:, 0], distrib[:, 1], c='blue', alpha=0.6)
+        ax.set_title(f"{method.upper()} Reduced Visualization of {exp} Data (2D)")
+        ax.set_xlabel("Dimension 1")
+        ax.set_ylabel("Dimension 2")
+    elif dim == 3:
+        ax.scatter(distrib[:, 0], distrib[:, 1], distrib[:, 2], c='blue', alpha=0.6)
+        ax.set_title(f"{method.upper()} Reduced Visualization of {exp} Data (3D)")
+        ax.set_xlabel("Dimension 1")
+        ax.set_ylabel("Dimension 2")
+        ax.set_zlabel("Dimension 3")
+    else:
+        raise ValueError("target_dim must be 2 or 3.")
 
-    
-    plt.savefig(os.path.join(folder_path, ''+exp+'_'+str(dim)+'dim_'+method+'.png'))
-    if show:
-        plt.show()
-    plt.close()
+
 
 
 def apply_pca(data, num_components=2):

@@ -50,6 +50,7 @@ def identify(dataloaders, model, hyperparams, train):
     else:
         # Print epoch loss
         print('Training ...')
+        losses_over_epochs = []
         progress_bar = tqdm(range(epochs))
         for epoch in progress_bar:
             train_loss, train_acc = train_loop(train_loader,test_model, criterion, optimizer, device)
@@ -68,7 +69,6 @@ def identify(dataloaders, model, hyperparams, train):
     print("\nFinal Test Results")
     print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_acc:.4f}")
     
-
     #PLOT WITH PCA AND TSNE (WHAT DO I PLOT?)
     # Number of principal components to test
     num_components = np.arange(1, embedding_size + 1)
@@ -76,6 +76,7 @@ def identify(dataloaders, model, hyperparams, train):
 
 
     embeddings = torch.cat(embeddings)
+    predicted_distrib = torch.cat(predicted_distrib)
     # Compute reconstruction error for different numbers of components
     for n in num_components:
         pcareduced_distrib, reconstructed_data = apply_pca(embeddings, num_components=n)
@@ -98,12 +99,12 @@ def identify(dataloaders, model, hyperparams, train):
     plt.grid(True)
     plt.savefig(os.path.join(plots_folder_path, 'PCA_analysis.png'))
     #plt.show()
+    plt.close()
 
-    predicted_distrib = predicted_distrib
     real_distrib = torch.cat([batch['label'] for batch in test_loader])
     min_index = errors[:3].index(min(errors[:3]))
     print('num optimal dimensions:', min_index + 1)
-    if min_index < 4: #Must be
+    if min_index < 4 and min_index>1: #Must be
         num_components = min_index + 1
         pcareduced_pred_distrib, reconstructed_data = apply_pca(predicted_distrib, num_components=num_components)
         tsnereduced_pred_distrib = apply_tsne(predicted_distrib, num_components=num_components)
@@ -111,14 +112,26 @@ def identify(dataloaders, model, hyperparams, train):
         pcareduced_distrib, _ = apply_pca(real_distrib, num_components=num_components)
         tsnereduced_distrib = apply_tsne(real_distrib, num_components=num_components)
 
-        #show_distrib(predicted_distrib, predicted=True)
-        show_distrib(pcareduced_pred_distrib, plots_folder_path, method='PCA', predicted=True)
-        show_distrib(tsnereduced_pred_distrib, plots_folder_path, method='TSNE', predicted=True)
-        #show_distrib(real_distrib, predicted=False)
-        show_distrib(pcareduced_distrib, plots_folder_path, method='PCA', predicted=False)
-        show_distrib(tsnereduced_distrib, plots_folder_path,  method='TSNE', predicted=False)
+        projection = '3d' if num_components == 3 else None
 
-    
+        pca_fig, pca_axs = plt.subplots(1, 2, figsize=(12, 10),
+                            subplot_kw={'projection': projection} if projection else {})
+
+        show_distrib(pcareduced_distrib, method='PCA', predicted=False, ax=pca_axs[0])
+        show_distrib(pcareduced_pred_distrib, method='PCA', predicted=True, ax=pca_axs[1])
+        pca_fig.tight_layout()
+        plt.savefig(os.path.join(plots_folder_path,''+str(pcareduced_distrib.shape[1])+'dim_pca.png'))
+        plt.close()
+
+
+        tsne_fig, tsne_axs = plt.subplots(1, 2, figsize=(12, 10),
+                    subplot_kw={'projection': projection} if projection else {})
+        show_distrib(tsnereduced_distrib, method='TSNE', predicted=False, ax=tsne_axs[0])
+        show_distrib(tsnereduced_pred_distrib, method='TSNE', predicted=True, ax=tsne_axs[1])
+        tsne_fig.tight_layout()
+        plt.savefig(os.path.join(plots_folder_path,''+str(tsnereduced_distrib.shape[1])+'dim_tsne.png'))
+        plt.close()
+
 
 
     

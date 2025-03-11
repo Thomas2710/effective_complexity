@@ -50,5 +50,5 @@ def dataset_cifar(hyperparams):
                                          shuffle=False, num_workers=2, collate_fn=collate_fn)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE,
                                          shuffle=False, num_workers=2, collate_fn=collate_fn)
-    
+   
     return train_loader, val_loader, test_loader

@@ -116,6 +116,7 @@ def test_loop(test_loader, model, criterion, device='cpu'):
     logsoftmax = nn.LogSoftmax(dim=-1)
     softmax = nn.Softmax(dim=-1)
     total_fx = []
+    outputs_to_return = []
 
     d = model.get_W().shape[0]
     one_hots = torch.eye(d).float()
@@ -136,7 +137,7 @@ def test_loop(test_loader, model, criterion, device='cpu'):
             logits = torch.matmul(f_x, unembedding)
 
             outputs = logsoftmax(logits)
-            outputs_to_return = softmax(logits)
+            outputs_to_return.append(softmax(logits))
 
             loss = criterion(outputs, labels)
             loss += elastic_net_regularization(model, l1_lambda, l2_lambda, l1_weight, l2_weight)
