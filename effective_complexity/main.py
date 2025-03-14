@@ -75,6 +75,7 @@ def identify(dataloaders, model, hyperparams, train):
     errors = []
 
 
+
     embeddings = torch.cat(embeddings)
     predicted_distrib = torch.cat(predicted_distrib)
     # Compute reconstruction error for different numbers of components

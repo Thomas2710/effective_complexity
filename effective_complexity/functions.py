@@ -135,7 +135,6 @@ def test_loop(test_loader, model, criterion, device='cpu'):
             unembedding = model.get_unembeddings(one_hots)
 
             logits = torch.matmul(f_x, unembedding)
-
             outputs = logsoftmax(logits)
             outputs_to_return.append(softmax(logits))
 
